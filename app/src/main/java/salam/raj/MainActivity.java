@@ -1,11 +1,12 @@
 package salam.raj;
 
-import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -14,21 +15,33 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements android.location.LocationListener {
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 
-    boolean isgpsenabled, isnetworkenabled,isitfirst = true,isitsecond = false;
-    LocationManager manager;
-    Location location;
-    double latitude, longitude,latitude2,longitude2,lat1,lat2,lon1,lon2;
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+
+
     TextView tvspeed;
+    public LocationRequest mlocationrequest;
     Button btstart;
-    float distance;
+    public boolean isitfirsttime =true,isitsecondtime = false;
+    double latitude,longitude;
+    double lat1,lon1,lat2,lon2;
+    public Location mlastlocation;
+    public GoogleApiClient mApiClient;
     AlertDialog.Builder dialog;
+    public ProgressDialog pLoading;
+    float distance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        pLoading = new ProgressDialog(this);
 
         dialog = new AlertDialog.Builder(this);
 
@@ -36,15 +49,21 @@ public class MainActivity extends AppCompatActivity implements android.location.
         btstart = (Button) findViewById(R.id.bt_start);
 
 
-        manager = (LocationManager) this.getSystemService(LOCATION_SERVICE);
+        mApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API).build();
+
+        mlocationrequest = new LocationRequest();
+        mlocationrequest.setInterval(2000);
+        mlocationrequest.setFastestInterval(2000);
+        mlocationrequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
 
         btstart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                    checkinggps();
-
+                getlocation();
 
             }
         });
@@ -52,173 +71,126 @@ public class MainActivity extends AppCompatActivity implements android.location.
 
     }
 
-    private void checkinggps() {
-        isgpsenabled = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        isnetworkenabled = manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        Log.e("gpsenabled", String.valueOf(isgpsenabled));
-        Log.e("networkenabled", String.valueOf(isnetworkenabled));
-        if (isgpsenabled && isnetworkenabled) {
-            checkpermissions();
-
-        } else {
-            dialog.setTitle("Alert");
-            dialog.setMessage("SARA Needs GPS To Continue");
-            dialog.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    finish();
-                }
-            });
-            dialog.show();
-            //Toast.makeText(MainActivity.this, "Please enable gps to start", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private void checkpermissions() {
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            dialog.setTitle("Alert");
-            dialog.setMessage("SARA Need Permissions To Continue");
-            dialog.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    finish();
-                }
-            });
-            dialog.show();
-        } else {
-            getlocation();
-        }
-
-    }
-
-
     private void getlocation() {
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        if (isgpsenabled){
-            location = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        }else if (isnetworkenabled){
-            location = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        }else {
-            dialog.setTitle("Alert");
-            dialog.setMessage("SARA Needs GPS To conitnue\n Please Enable It");
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            dialog = new AlertDialog.Builder(this);
+            dialog.setMessage("Sara Needs Your Persmission to Get Locations");
             dialog.setNeutralButton("OK", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     finish();
                 }
             });
-            dialog.show();
+
+        }else {
+            pLoading.setMessage("Getting the Location\nPlease Wait...");
+            pLoading.setCancelable(false);
+            pLoading.show();
+            LocationServices.FusedLocationApi.requestLocationUpdates(mApiClient, mlocationrequest, this);
         }
-
-        if (isitfirst){
-            latitude = location.getLatitude();
-            longitude = location.getLongitude();
-
-            Log.e("latitude and longitudes",latitude+"\n"+longitude);
-
-            if (latitude!=0 && longitude!=0){
-                isitfirst = false;
-                checkinggps();
-            }
-        }else{
-            latitude2 = location.getLatitude();
-            longitude2 = location.getLongitude();
-            calculatedistance(latitude2,longitude2);
-            checkinggps();
-        }
-
-
-
-
 
     }
 
-    private void calculatedistance(double latitude2, double longitude2) {
-        if (!isitsecond){
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mApiClient!=null){
+            mApiClient.connect();
+        }
+    }
+
+
+       @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.e("Connection Status","Connected");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mApiClient.connect();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+        Log.e("Connection status",connectionResult.getErrorMessage());
+
+    }
+
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        mlastlocation = location;
+        if (mlastlocation!=null){
+           dispalylocation(mlastlocation);
+        }
+    }
+
+    private void dispalylocation(Location mlastlocation) {
+        pLoading.dismiss();
+        latitude = mlastlocation.getLatitude();
+        longitude = mlastlocation.getLongitude();
+        Log.e("co-ordinates",latitude+"\n"+longitude);
+       calculatedistance(latitude,longitude);
+    }
+
+    private void calculatedistance(double latitude, double longitude) {
+        if (isitfirsttime){
              lat1 = latitude;
              lon1 = longitude;
+            isitfirsttime =false;
+            isitsecondtime = true;
+            Log.e("status","First Time");
+        }else if (isitsecondtime){
+             lat2 = latitude;
+             lon2 = longitude;
+            Log.e("status","Second Time");
+            isitsecondtime = false;
+           distance =  gettingdistance(lat1,lon1,lat2,lon2);
+            //tvspeed.setText("Distance"+distance);
+            calculatespeed(distance);
+            Log.e("distance",String.valueOf(distance));
+        }
 
-             lat2 = latitude2;
-             lon2 = longitude2;
-
-            isitsecond = true;
-            Log.e("co-oridanates1",lat1+" "+lon1+"\n"+lat2+" "+lon2);
-            distance = gettingdistance(lat1,lon1,lat2,lon2);
-
-            tvspeed.setText("Distance:- "+distance);
-            Log.e("Distance", String.valueOf(distance));
-        }else {
+        if (!isitsecondtime){
             lat1 = lat2;
             lon1 = lon2;
-
-            lat2 = latitude2;
-            lon2 = longitude2;
-            Log.e("co-oridanates2",lat1+" "+lon1+"\n"+lat2+" "+lon2);
+            lat2 = latitude;
+            lon2 = longitude;
+            Log.e("status","Third Time");
             distance = gettingdistance(lat1,lon1,lat2,lon2);
-            tvspeed.setText("Distance:- "+distance);
-            Log.e("Distance", String.valueOf(distance));
+            //tvspeed.setText("Distance"+distance);
+            calculatespeed(distance);
+            Log.e("distance",String.valueOf(distance));
         }
+    }
+
+    private void calculatespeed(float distance) {
+        float speed = distance/2;
+        Log.e("speed",String.valueOf(speed));
+        tvspeed.setText("Speed "+speed);
     }
 
     private float gettingdistance(double lat1, double lon1, double lat2, double lon2) {
-        double distance = 0;
-
-        lat2 = 52.527204;
-        lon2 = 13.398167;
-
-
-
+        Log.e("co-ords",lat1+" "+lat2+"\n"+lon1+" "+lon2);
 
         double earthRadius = 3958.75;
         double latDiff = Math.toRadians(lat2-lat1);
         double lngDiff = Math.toRadians(lon2-lon1);
-        //Log.e("difference",latDiff+"\n"+lngDiff);
         double a = Math.sin(latDiff /2) * Math.sin(latDiff /2) +
                 Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
                         Math.sin(lngDiff /2) * Math.sin(lngDiff /2);
-       // Log.e("Calculation",String.valueOf(a));
-
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-        //Log.e("Calc",String.valueOf(c));
-        distance = earthRadius * c;
+        double distance = earthRadius * c;
 
         int meterConversion = 1609;
-
-        Log.e("Dist", String.valueOf(distance*meterConversion));
 
         return new Float(distance * meterConversion).floatValue();
 
 
-
-
     }
-
-
-    @Override
-    public void onLocationChanged(Location location) {
-
-    }
-
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String s) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String s) {
-
-    }
-
-
 }
