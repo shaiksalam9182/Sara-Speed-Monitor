@@ -20,13 +20,15 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
 
     TextView tvspeed;
     public LocationRequest mlocationrequest;
-    Button btstart;
+    Button btstart,btset;
     public boolean isitfirsttime =true,isitsecondtime = false;
     double latitude,longitude;
     double lat1,lon1,lat2,lon2;
@@ -34,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public GoogleApiClient mApiClient;
     AlertDialog.Builder dialog;
     public ProgressDialog pLoading;
+    FirebaseDatabase fbdatabase;
+    DatabaseReference dbref;
     float distance;
 
     @Override
@@ -41,12 +45,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        fbdatabase = FirebaseDatabase.getInstance();
+        dbref = fbdatabase.getReference("user speed");
+
         pLoading = new ProgressDialog(this);
 
         dialog = new AlertDialog.Builder(this);
 
         tvspeed = (TextView) findViewById(R.id.tv_speed);
         btstart = (Button) findViewById(R.id.bt_start);
+        btset = (Button) findViewById(R.id.btsetfire);
 
 
         mApiClient = new GoogleApiClient.Builder(this)
@@ -65,6 +73,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             public void onClick(View view) {
                 getlocation();
 
+            }
+        });
+
+        btset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dbref.setValue(distance);
             }
         });
 

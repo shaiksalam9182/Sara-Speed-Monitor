@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "121048223481",
+    "firebase_url": "https://sara-speed-monitor.firebaseio.com",
+    "project_id": "sara-speed-monitor",
+    "storage_bucket": "sara-speed-monitor.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:121048223481:android:4d665fcf594a39c6",
+        "android_client_info": {
+          "package_name": "salam.raj"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "121048223481-grorkg6vmmetc5afeumkthimbr5fdie7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "salam.raj",
+            "certificate_hash": "55d8c6137b413dd787b032596e91853309f3ab5f"
+          }
+        },
+        {
+          "client_id": "121048223481-q63r8q6gm207u9k5rh9kvkijpnveat6u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAf6IMszQKdpecITZv_GtHEYbvj7vc3Iro"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "121048223481-q63r8q6gm207u9k5rh9kvkijpnveat6u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
