@@ -2,6 +2,7 @@ package salam.raj;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -39,14 +40,26 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     FirebaseDatabase fbdatabase;
     DatabaseReference dbref;
     float distance;
+    String phoneno;
+    SharedPreferences sdf;
+    float speed;
+    SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
+        sdf = getApplicationContext().getSharedPreferences("users",0);
+        editor = sdf.edit();
+
+        phoneno = sdf.getString("userphoneno",null);
+
+
         fbdatabase = FirebaseDatabase.getInstance();
-        dbref = fbdatabase.getReference("user speed");
+        dbref = fbdatabase.getReference("user_speed_info");
 
         pLoading = new ProgressDialog(this);
 
@@ -79,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         btset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dbref.setValue(distance);
+                dbref.child(phoneno).push().setValue((int)speed);
             }
         });
 
@@ -185,9 +198,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private void calculatespeed(float distance) {
-        float speed = distance/2;
+        if (distance>1000){
+            distance = distance/1000;
+        }
+        speed = distance/2;
         Log.e("speed",String.valueOf(speed));
-        tvspeed.setText("Speed "+speed);
+        tvspeed.setText("Speed "+(int)speed);
     }
 
     private float gettingdistance(double lat1, double lon1, double lat2, double lon2) {
