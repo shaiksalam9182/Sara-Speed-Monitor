@@ -72,7 +72,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onClick(View view) {
                 getlocation();
-
             }
         });
 
@@ -80,6 +79,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onClick(View view) {
                 dbref.setValue(distance);
+
+
             }
         });
 
