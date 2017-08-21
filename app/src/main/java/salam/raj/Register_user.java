@@ -4,17 +4,17 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class Register_user extends AppCompatActivity {
 
@@ -47,9 +47,9 @@ public class Register_user extends AppCompatActivity {
         dbref= database.getReference("user_registration");
 
         sphone = sdf.getString("userphoneno",null);
-        if (sphone!=null){
+        /*if (sphone!=null){
             startActivity(new Intent(Register_user.this,MainActivity.class));
-        }
+        }*/
 
         et_phone = (EditText)findViewById(R.id.etphoneno);
         et_first_name = (EditText)findViewById(R.id.etfirstname);
@@ -70,31 +70,30 @@ public class Register_user extends AppCompatActivity {
                 password  = et_password.getText().toString();
                 final String conc = firstname+","+lastname;
 
-                dbref.child(phone).child("pwd").setValue(password).addOnCompleteListener(new OnCompleteListener<Void>() {
+                String key = dbref.push().getKey();
+                dbref.child(key).child("phone").setValue(phone);
+                dbref.child(key).child("firstname").setValue(firstname);
+                dbref.child(key).child("lastname").setValue(lastname);
+                dbref.child(key).child("password").setValue(password);
+
+
+                dbref.addValueEventListener(new ValueEventListener() {
                     @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()){
-                            dbref.child(phone).child("Details").setValue(conc).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (task.isSuccessful()){
-                                        pdLoading.dismiss();
-                                        Toast.makeText(Register_user.this,"Successfully Registered",Toast.LENGTH_LONG).show();
-                                        editor.putString("userphoneno",phone);
-                                        editor.commit();
-                                        startActivity(new Intent(Register_user.this,MainActivity.class));
-                                        finish();
-                                    }else {
-                                        pdLoading.dismiss();
-                                        Toast.makeText(Register_user.this,"Error In registering",Toast.LENGTH_LONG).show();
-                                    }
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        pdLoading.dismiss();
+                        Toast.makeText(Register_user.this,"Successfully Registered",Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(Register_user.this,Login.class));
+                    }
 
-
-                                }
-                            });
-                        }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        pdLoading.dismiss();
+                        Toast.makeText(Register_user.this,"Error In Registration",Toast.LENGTH_SHORT).show();
                     }
                 });
+
+
+
 
 
 

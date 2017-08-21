@@ -39,6 +39,7 @@
         android:layout_width="fill_parent"
         android:hint="Enter Password"
         android:id="@+id/etpassword"
+        android:inputType="textPassword"
         android:layout_height="wrap_content" />
 
 

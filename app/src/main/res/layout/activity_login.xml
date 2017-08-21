@@ -24,6 +24,7 @@
         android:layout_width="fill_parent"
         android:hint="Enter Password"
         android:layout_marginTop="20dp"
+        android:inputType="textPassword"
         android:id="@+id/et_login_password"
         android:layout_height="wrap_content" />
 

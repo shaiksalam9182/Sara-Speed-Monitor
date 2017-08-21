@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 
-       @Override
+    @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.e("Connection Status","Connected");
     }
@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onLocationChanged(Location location) {
         mlastlocation = location;
         if (mlastlocation!=null){
-           dispalylocation(mlastlocation);
+            dispalylocation(mlastlocation);
         }
     }
 
@@ -163,22 +163,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         latitude = mlastlocation.getLatitude();
         longitude = mlastlocation.getLongitude();
         Log.e("co-ordinates",latitude+"\n"+longitude);
-       calculatedistance(latitude,longitude);
+        calculatedistance(latitude,longitude);
     }
 
     private void calculatedistance(double latitude, double longitude) {
         if (isitfirsttime){
-             lat1 = latitude;
-             lon1 = longitude;
+            lat1 = latitude;
+            lon1 = longitude;
             isitfirsttime =false;
             isitsecondtime = true;
             Log.e("status","First Time");
         }else if (isitsecondtime){
-             lat2 = latitude;
-             lon2 = longitude;
+            lat2 = latitude;
+            lon2 = longitude;
             Log.e("status","Second Time");
             isitsecondtime = false;
-           distance =  gettingdistance(lat1,lon1,lat2,lon2);
+            distance =  gettingdistance(lat1,lon1,lat2,lon2);
             //tvspeed.setText("Distance"+distance);
             calculatespeed(distance);
             Log.e("distance",String.valueOf(distance));
