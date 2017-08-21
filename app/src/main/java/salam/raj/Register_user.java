@@ -47,9 +47,7 @@ public class Register_user extends AppCompatActivity {
         dbref= database.getReference("user_registration");
 
         sphone = sdf.getString("userphoneno",null);
-        /*if (sphone!=null){
-            startActivity(new Intent(Register_user.this,MainActivity.class));
-        }*/
+
 
         et_phone = (EditText)findViewById(R.id.etphoneno);
         et_first_name = (EditText)findViewById(R.id.etfirstname);
@@ -68,29 +66,36 @@ public class Register_user extends AppCompatActivity {
                 firstname = et_first_name.getText().toString();
                 lastname = et_last_name.getText().toString();
                 password  = et_password.getText().toString();
-                final String conc = firstname+","+lastname;
 
-                String key = dbref.push().getKey();
-                dbref.child(key).child("phone").setValue(phone);
-                dbref.child(key).child("firstname").setValue(firstname);
-                dbref.child(key).child("lastname").setValue(lastname);
-                dbref.child(key).child("password").setValue(password);
+                if (phone.equals("") || firstname.equals("") || lastname.equals("") || password.equals("")){
+                    pdLoading.dismiss();
+                    Toast.makeText(Register_user.this,"Please fill All Fields",Toast.LENGTH_SHORT).show();
+                }else{
+                    String key = dbref.push().getKey();
+                    dbref.child(key).child("phone").setValue(phone);
+                    dbref.child(key).child("firstname").setValue(firstname);
+                    dbref.child(key).child("lastname").setValue(lastname);
+                    dbref.child(key).child("password").setValue(password);
 
 
-                dbref.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        pdLoading.dismiss();
-                        Toast.makeText(Register_user.this,"Successfully Registered",Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(Register_user.this,Login.class));
-                    }
+                    dbref.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            pdLoading.dismiss();
+                            Toast.makeText(Register_user.this,"Successfully Registered",Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(Register_user.this,Login.class));
+                        }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        pdLoading.dismiss();
-                        Toast.makeText(Register_user.this,"Error In Registration",Toast.LENGTH_SHORT).show();
-                    }
-                });
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            pdLoading.dismiss();
+                            Toast.makeText(Register_user.this,"Error In Registration",Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+                //final String conc = firstname+","+lastname;
+
+
 
 
 

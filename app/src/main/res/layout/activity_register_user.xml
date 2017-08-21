@@ -13,7 +13,7 @@
         android:textSize="25dp"
         android:layout_gravity="center"
         android:layout_height="wrap_content" />
-    
+
     <EditText
         android:layout_width="fill_parent"
         android:hint="Enter Phone No"

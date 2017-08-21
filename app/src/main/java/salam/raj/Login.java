@@ -1,6 +1,7 @@
 package salam.raj;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -58,7 +59,14 @@ public class Login extends AppCompatActivity {
                 mobileno = et_mobile_no.getText().toString();
                 password = et_password.getText().toString();
 
-                Authenticatewithfirebase(mobileno,password);
+                if (mobileno.equals("") || password.equals("")){
+                    pdLoading.dismiss();
+                    Toast.makeText(Login.this,"Please fill all fields",Toast.LENGTH_SHORT).show();
+                }else {
+                    Authenticatewithfirebase(mobileno,password);
+                }
+
+
 
             }
         });
@@ -96,5 +104,9 @@ public class Login extends AppCompatActivity {
 
             }
         });
+    }
+
+    public void callRegister(View v){
+        startActivity(new Intent(Login.this,Register_user.class));
     }
 }
