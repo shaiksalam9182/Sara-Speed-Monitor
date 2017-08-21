@@ -68,27 +68,36 @@ public class Register_user extends AppCompatActivity {
                 firstname = et_first_name.getText().toString();
                 lastname = et_last_name.getText().toString();
                 password  = et_password.getText().toString();
-                String conc = firstname+","+lastname+","+password;
+                final String conc = firstname+","+lastname;
 
-
-                dbref.child(phone).child("Details").setValue(conc).addOnCompleteListener(new OnCompleteListener<Void>() {
+                dbref.child(phone).child("pwd").setValue(password).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()){
-                            pdLoading.dismiss();
-                            Toast.makeText(Register_user.this,"Successfully Registered",Toast.LENGTH_LONG).show();
-                            editor.putString("userphoneno",phone);
-                            editor.commit();
-                            startActivity(new Intent(Register_user.this,MainActivity.class));
-                            finish();
-                        }else {
-                            pdLoading.dismiss();
-                            Toast.makeText(Register_user.this,"Error In registering",Toast.LENGTH_LONG).show();
+                            dbref.child(phone).child("Details").setValue(conc).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()){
+                                        pdLoading.dismiss();
+                                        Toast.makeText(Register_user.this,"Successfully Registered",Toast.LENGTH_LONG).show();
+                                        editor.putString("userphoneno",phone);
+                                        editor.commit();
+                                        startActivity(new Intent(Register_user.this,MainActivity.class));
+                                        finish();
+                                    }else {
+                                        pdLoading.dismiss();
+                                        Toast.makeText(Register_user.this,"Error In registering",Toast.LENGTH_LONG).show();
+                                    }
+
+
+                                }
+                            });
                         }
-
-
                     }
                 });
+
+
+
             }
         });
     }
